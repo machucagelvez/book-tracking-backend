@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { UserBook } from '../../user_book/entities/user_book.entity';
 
 @Entity()
 export class User {
@@ -12,10 +14,10 @@ export class User {
   id: string;
 
   @Column('varchar')
-  first_name: string;
+  firstName: string;
 
   @Column('varchar')
-  last_name: string;
+  lastName: string;
 
   @Column('varchar', { unique: true })
   email: string;
@@ -28,4 +30,7 @@ export class User {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
+
+  @OneToMany(() => UserBook, (userBook) => userBook.user)
+  userBook: UserBook[];
 }
