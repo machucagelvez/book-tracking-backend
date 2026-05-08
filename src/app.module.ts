@@ -5,6 +5,7 @@ import { UserModule } from './user/user.module';
 import { BookModule } from './book/book.module';
 import { UserBookModule } from './user_book/user_book.module';
 import { CommonModule } from './common/common.module';
+import { ReadingStatusModule } from './reading_status/reading_status.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { CommonModule } from './common/common.module';
     BookModule,
     UserBookModule,
     CommonModule,
+    ReadingStatusModule,
   ],
 })
 export class AppModule {}

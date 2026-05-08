@@ -1,7 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { UserBookService } from './user_book.service';
 import { CreateUserBookDto } from './dto/create-user_book.dto';
 import { UpdateUserBookDto } from './dto/update-user_book.dto';
+import { read } from 'fs';
 
 @Controller('user-book')
 export class UserBookController {
@@ -13,8 +23,8 @@ export class UserBookController {
   }
 
   @Get()
-  findAll() {
-    return this.userBookService.findAll();
+  findByStatus(@Query('reading_status') readingStatusId?: number) {
+    return this.userBookService.findByStatus(+readingStatusId);
   }
 
   @Get(':id')
@@ -23,7 +33,10 @@ export class UserBookController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserBookDto: UpdateUserBookDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateUserBookDto: UpdateUserBookDto,
+  ) {
     return this.userBookService.update(+id, updateUserBookDto);
   }
 

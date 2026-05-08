@@ -3,11 +3,11 @@ import { IsEmail, IsString, MinLength } from 'class-validator';
 export class CreateUserDto {
   @IsString()
   @MinLength(2)
-  first_name: string;
+  firstName: string;
 
   @IsString()
   @MinLength(2)
-  last_name: string;
+  lastName: string;
 
   @IsEmail()
   email: string;
