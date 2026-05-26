@@ -11,7 +11,7 @@ import {
 import { UserBookService } from './user_book.service';
 import { CreateUserBookDto } from './dto/create-user_book.dto';
 import { UpdateUserBookDto } from './dto/update-user_book.dto';
-import { read } from 'fs';
+import { UserBookFiltersDto } from './dto/user-book-filters.dto';
 
 @Controller('user-book')
 export class UserBookController {
@@ -23,8 +23,13 @@ export class UserBookController {
   }
 
   @Get()
-  findByStatus(@Query('reading_status') readingStatusId?: number) {
-    return this.userBookService.findByStatus(+readingStatusId);
+  findByStatus(@Query() userBookFiltersDto: UserBookFiltersDto) {
+    return this.userBookService.findByStatus(userBookFiltersDto);
+  }
+
+  @Get('summary')
+  getSummary() {
+    return this.userBookService.getSummary();
   }
 
   @Get(':id')
