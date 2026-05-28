@@ -19,6 +19,7 @@ import { ReadingStatusModule } from './reading_status/reading_status.module';
       password: process.env.DB_PASSWORD,
       autoLoadEntities: true,
       synchronize: true,
+      // logging: true,
     }),
     UserModule,
     BookModule,

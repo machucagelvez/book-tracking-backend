@@ -7,6 +7,7 @@ import { UpdateUserBookDto } from './dto/update-user_book.dto';
 import { UserBook } from './entities/user_book.entity';
 import { CommonService } from '../common/common.service';
 import { UserService } from '../user/user.service';
+import { UserBookFiltersDto } from './dto/user-book-filters.dto';
 
 @Injectable()
 export class UserBookService {
@@ -35,12 +36,20 @@ export class UserBookService {
     }
   }
 
-  async findByStatus(readingStatusId?: number) {
+  async findByStatus(userBookFiltersDto?: UserBookFiltersDto) {
+    const {
+      limit = 6,
+      page = 1,
+      reading_status: readingStatus,
+    } = userBookFiltersDto;
+    const offset = (page - 1) * limit;
+
     const queryBuilder = this.userBookRepository
       .createQueryBuilder('userBook')
       .innerJoin('userBook.readingStatus', 'readingStatus')
       .innerJoin('userBook.book', 'book')
       .select([
+        'userBook.id AS "userBookId"',
         'book.title AS "title"',
         'book.synopsis AS "synopsis"',
         'userBook.startDate AS "startDate"',
@@ -56,13 +65,33 @@ export class UserBookService {
         'userBook.updatedAt AS "updatedAt"',
       ]);
 
-    if (readingStatusId)
-      queryBuilder.where('readingStatus.id = :readingStatusId', {
-        readingStatusId,
+    if (readingStatus)
+      queryBuilder.where('readingStatus.name = :readingStatus', {
+        readingStatus,
       });
 
-    const userBooks = await queryBuilder.getRawMany();
-    return userBooks;
+    const total = await queryBuilder.getCount();
+    const pages = Math.ceil(total / limit);
+
+    const userBooks = await queryBuilder
+      .limit(limit)
+      .offset(offset)
+      .getRawMany();
+    return { total, pages, userBooks };
+  }
+
+  getSummary() {
+    const queryBuilder = this.userBookRepository
+      .createQueryBuilder('userBook')
+      .innerJoin('userBook.readingStatus', 'readingStatus')
+      .select([
+        "COUNT(*) FILTER (WHERE readingStatus.name = 'pending')   AS pending",
+        "COUNT(*) FILTER (WHERE readingStatus.name = 'completed') AS completed",
+        "COUNT(*) FILTER (WHERE readingStatus.name = 'reading')   AS reading",
+        "COUNT(*) FILTER (WHERE readingStatus.name = 'dropped')   AS dropped",
+        'COUNT(*) AS total',
+      ]);
+    return queryBuilder.getRawOne();
   }
 
   findOne(id: number) {
