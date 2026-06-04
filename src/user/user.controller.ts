@@ -7,9 +7,13 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, UpdateUserDto, LoginUserDto } from './dto';
+import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from './decorators/get-user.decorator';
+import { User } from './entities/user.entity';
 
 @Controller('user')
 export class UserController {
@@ -23,6 +27,12 @@ export class UserController {
   @Post('login')
   login(@Body() loginUserDto: LoginUserDto) {
     return this.userService.login(loginUserDto);
+  }
+
+  @Get('check-status')
+  @UseGuards(AuthGuard())
+  checkStatus(@GetUser() user: User) {
+    return this.userService.checkStatus(user);
   }
 
   @Get()

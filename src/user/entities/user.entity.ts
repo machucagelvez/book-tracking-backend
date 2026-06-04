@@ -1,4 +1,6 @@
 import {
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   CreateDateColumn,
   Entity,
@@ -26,7 +28,7 @@ export class User {
   password: string;
 
   @Column('bool', { default: true })
-  isActive: boolean;
+  status: boolean;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
@@ -36,4 +38,14 @@ export class User {
 
   @OneToMany(() => UserBook, (userBook) => userBook.user)
   userBook: UserBook[];
+
+  @BeforeInsert()
+  checkFieldsBeforeInsert() {
+    this.email = this.email.toLocaleLowerCase().trim();
+  }
+
+  @BeforeUpdate()
+  checkFieldsBeforeUpdate() {
+    this.checkFieldsBeforeInsert();
+  }
 }

@@ -8,6 +8,7 @@ import { UserBook } from './entities/user_book.entity';
 import { CommonService } from '../common/common.service';
 import { UserService } from '../user/user.service';
 import { UserBookFiltersDto } from './dto/user-book-filters.dto';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class UserBookService {
@@ -15,7 +16,6 @@ export class UserBookService {
     @InjectRepository(UserBook)
     private readonly userBookRepository: Repository<UserBook>,
     private readonly commonService: CommonService,
-    private readonly userService: UserService,
   ) {}
 
   async create(createUserBookDto: CreateUserBookDto) {
@@ -36,7 +36,7 @@ export class UserBookService {
     }
   }
 
-  async findByStatus(userBookFiltersDto?: UserBookFiltersDto) {
+  async findByStatus(user: User, userBookFiltersDto?: UserBookFiltersDto) {
     const {
       limit = 6,
       page = 1,
@@ -48,6 +48,8 @@ export class UserBookService {
       .createQueryBuilder('userBook')
       .innerJoin('userBook.readingStatus', 'readingStatus')
       .innerJoin('userBook.book', 'book')
+      .innerJoin('userBook.user', 'user')
+      .andWhere('user.id = :userId', { userId: user.id })
       .select([
         'userBook.id AS "userBookId"',
         'book.title AS "title"',
@@ -66,7 +68,7 @@ export class UserBookService {
       ]);
 
     if (readingStatus)
-      queryBuilder.where('readingStatus.name = :readingStatus', {
+      queryBuilder.andWhere('readingStatus.name = :readingStatus', {
         readingStatus,
       });
 
@@ -80,7 +82,7 @@ export class UserBookService {
     return { total, pages, userBooks };
   }
 
-  getSummary() {
+  getSummary(user: User) {
     const queryBuilder = this.userBookRepository
       .createQueryBuilder('userBook')
       .innerJoin('userBook.readingStatus', 'readingStatus')
@@ -90,7 +92,8 @@ export class UserBookService {
         "COUNT(*) FILTER (WHERE readingStatus.name = 'reading')   AS reading",
         "COUNT(*) FILTER (WHERE readingStatus.name = 'dropped')   AS dropped",
         'COUNT(*) AS total',
-      ]);
+      ])
+      .where('userBook.userId = :userId', { userId: user.id });
     return queryBuilder.getRawOne();
   }
 
