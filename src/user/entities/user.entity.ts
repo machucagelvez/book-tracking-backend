@@ -1,4 +1,6 @@
 import {
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   CreateDateColumn,
   Entity,
@@ -22,8 +24,11 @@ export class User {
   @Column('varchar', { unique: true })
   email: string;
 
-  @Column('varchar')
+  @Column('varchar', { select: false })
   password: string;
+
+  @Column('bool', { default: true })
+  status: boolean;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
@@ -33,4 +38,14 @@ export class User {
 
   @OneToMany(() => UserBook, (userBook) => userBook.user)
   userBook: UserBook[];
+
+  @BeforeInsert()
+  checkFieldsBeforeInsert() {
+    this.email = this.email.toLocaleLowerCase().trim();
+  }
+
+  @BeforeUpdate()
+  checkFieldsBeforeUpdate() {
+    this.checkFieldsBeforeInsert();
+  }
 }

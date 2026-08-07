@@ -7,13 +7,18 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { UserBookService } from './user_book.service';
 import { CreateUserBookDto } from './dto/create-user_book.dto';
 import { UpdateUserBookDto } from './dto/update-user_book.dto';
 import { UserBookFiltersDto } from './dto/user-book-filters.dto';
+import { GetUser } from '../user/decorators/get-user.decorator';
+import { User } from '../user/entities/user.entity';
 
 @Controller('user-book')
+@UseGuards(AuthGuard())
 export class UserBookController {
   constructor(private readonly userBookService: UserBookService) {}
 
@@ -23,13 +28,16 @@ export class UserBookController {
   }
 
   @Get()
-  findByStatus(@Query() userBookFiltersDto: UserBookFiltersDto) {
-    return this.userBookService.findByStatus(userBookFiltersDto);
+  findByStatus(
+    @Query() userBookFiltersDto: UserBookFiltersDto,
+    @GetUser() user: User,
+  ) {
+    return this.userBookService.findByStatus(user, userBookFiltersDto);
   }
 
   @Get('summary')
-  getSummary() {
-    return this.userBookService.getSummary();
+  getSummary(@GetUser() user: User) {
+    return this.userBookService.getSummary(user);
   }
 
   @Get(':id')
